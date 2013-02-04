@@ -3,6 +3,6 @@
 
 	"card":{ "health":3, "attack":3, "support":1 },
 
-	"team-position":"0",
-	"slot-position":"2"
+	"team-position":"1",
+	"slot-position":"3"
 }

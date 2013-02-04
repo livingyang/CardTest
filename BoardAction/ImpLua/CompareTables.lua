@@ -166,7 +166,7 @@ function CompareTables(t1,t2,orderby,n1,n2,fmt1,fmt2,comparef,CBdupli,CBonly1,CB
 end
 
 -- ===================================================================================
---[=[
+---[=[
 -- test unit
 -- require 'CompareTables' -- or assert ( loadfile("CompareTables.lua") ) ()
 t1 = {
