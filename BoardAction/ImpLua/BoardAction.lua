@@ -1,6 +1,8 @@
-local BoardDataComparer = require('BoardDataComparer')
+local BoardDataComparer = require("BoardDataComparer")
 local BoardJsonDataLoader = require("BoardJsonDataLoader")
+local table = require("table")
 local tonumber = tonumber
+local tostring = tostring
 local ipairs = ipairs
 local print = print
 
@@ -22,76 +24,88 @@ function getCardSupportPosition( cardSlotPosition )
 end
 
 local MaxSlotCount = 6
+local MaxTeamCount = 2
 
-function addSupportToOtherSlot( slotList, slotPosition )
-	if slotList == nil or slotPosition <= 0 or slotPosition > MaxSlotCount then return end
+function isValidSlotPosition( slotPosition )
+	return slotPosition > 0 and slotPosition <= MaxSlotCount
+end
 
-	if slotList[slotPosition].card == nil then return end
+function isValidTeamPosition( teamPosition )
+	return teamPosition > 0 and teamPosition <= MaxSlotCount
+end
 
-	local cardSupport = slotList[slotPosition].card.support
+function addCardSupportToSlotList( slotList, slotPosition, cardSupport )
+	if slotList == nil or isValidSlotPosition(slotPosition) == false then return end
 
 	for i,v in ipairs(getCardSupportPosition(slotPosition)) do
 		slotList[v].support = slotList[v].support + cardSupport
 	end
 end
 
-function removeCardSupport( slotList, slotPosition )
-	if slotList == nil or slotPosition <= 0 or slotPosition > MaxSlotCount then return end
+function getSlotFromList( slotList, slotPosition )
+	if slotList == nil or isValidSlotPosition(slotPosition) == false then return end
 
-	if slotList[slotPosition].card == nil then return end
-
-	local cardSupport = slotList[slotPosition].card.support
-
-	for i,v in ipairs(getCardSupportPosition(slotPosition)) do
-		slotList[v].support = slotList[v].support - cardSupport
+	if table.getn(slotList) ~= MaxSlotCount then
+		print("getSlotFromList slot count is invalid: " .. table.getn(slotList))
+		return nil
 	end
+
+	return slotList[slotPosition]
+end
+
+function setCardToSlot( slotList, slotPosition, card )
+
+	local slot = getSlotFromList(slotList, slotPosition)
+
+	if slot.card ~= nil then
+		print("setCardToSlot slot.card ~= nil")
+		return
+	end
+
+	slot.card = card
+	addCardSupportToSlotList(slotList, slotPosition, card.support)
+end
+
+function removeSlotCard( slotList, slotPosition )
+	
+	local slot = getSlotFromList(slotList, slotPosition)
+
+	if slot.card == nil then
+		print("removeSlotCard slot.card == nil")
+		return
+	end
+
+	addCardSupportToSlotList(slotList, slotPosition, -slot.card.support)
+	slot.card = nil
+end
+
+function getTeamSlotList( board, teamPosition )
+	
+	local teamList = board and board["team-list"]
+	local team = teamList and teamList[teamPosition]
+
+	return team and team["slot-list"]
 end
 
 function actionSetCard( board, action )
-	
 	if board == nil or action == nil then return end
 
-	local teamList = board["team-list"]
-	if teamList == nil then return end
-
-	local team = teamList[tonumber(action["team-position"])]
-	if team == nil then return end
-
-	local slotList = team["slot-list"]
-	if slotList == nil then return end
-
-	local slotPosition = tonumber(action["slot-position"])
-	local slot = slotList[slotPosition]
-	if slot == nil then return end
-
-	slot.card = action.card
-
-	addSupportToOtherSlot(slotList, slotPosition)
-
+	setCardToSlot(getTeamSlotList(board, action["team-position"]), action["slot-position"], action.card)
 end
 
 function actionMoveCard( board, action )
 	if board == nil or action == nil then return end
 
-	local teamList = board["team-list"]
-	if teamList == nil then return end
+	local slotList = getTeamSlotList(board, action["team-position"])
 
-	local team = teamList[tonumber(action["team-position"])]
-	if team == nil then return end
+	local oldCardPosition = action["old-card-position"]
+	local newCardPosition = action["new-card-position"]
 
-	local slotList = team["slot-list"]
-	if slotList == nil then return end
+	local moveCard = slotList[oldCardPosition].card
+	if moveCard ~= nil and slotList[newCardPosition].card == nil then
 
-	local oldCardPosition = tonumber(action["old-card-position"])
-	local newCardPosition = tonumber(action["new-card-position"])
-
-	if slotList[oldCardPosition].card ~= nil and slotList[newCardPosition].card == nil then
-
-		removeCardSupport(slotList, oldCardPosition)
-		slotList[newCardPosition].card = slotList[oldCardPosition].card
-		slotList[oldCardPosition].card = nil
-		addSupportToOtherSlot(slotList, newCardPosition);
-
+		removeSlotCard(slotList, oldCardPosition)
+		setCardToSlot(slotList, newCardPosition, moveCard)
 	end
 end
 

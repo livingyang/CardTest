@@ -1,7 +1,7 @@
 {
 	"command":"move-card",
 
-	"team-position":"1",
-	"old-card-position":"3",
-	"new-card-position":"4"
+	"team-position":1,
+	"old-card-position":3,
+	"new-card-position":4
 }
