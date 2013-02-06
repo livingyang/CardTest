@@ -91,6 +91,11 @@ function actionSetCard( board, action )
 	if board == nil or action == nil then return end
 
 	setCardToSlot(getTeamSlotList(board, action["team-position"]), action["slot-position"], action.card)
+
+	if action.card["skill-list"] ~= nil then
+
+		local skillList = action.card["skill-list"]
+	end
 end
 
 function actionMoveCard( board, action )

@@ -1,0 +1,19 @@
+{
+	"command":"set-card",
+
+	"card": {
+		"health":3,
+		"attack":3, 
+		"support":1, 
+		"skill-list":[
+		{
+			"skill":"attackUp",
+			"upPoint":1,
+			"upPosition":"frontCard"
+		}
+		]
+	},
+
+	"team-position":1,
+	"slot-position":3
+}

@@ -7,14 +7,28 @@ module("BoardDataComparer")
 local MaxSlotCount = 6
 local MaxTeamCount = 2
 
+function is_same_skill_list( skillList1, skillList2 )
+	if skillList1 == nil and skillList2 == nil then
+		return true
+	elseif skillList1 ~= nil and skillList2 ~= nil then
+		return true
+	else
+		return false
+	end
+end
+
 function is_same_card( card1, card2 )
 	
-	if card1 == nil or card2 == nil then return false end
-
-	return card1.health == card2.health 
-	and card1.attack == card2.attack
-	and card1.support == card2.support
-
+	if card1 == nil and card2 == nil then
+		return true
+	elseif card1 ~= nil and card2 ~= nil then
+		return card1.health == card2.health 
+		and card1.attack == card2.attack
+		and card1.support == card2.support
+		and is_same_skill_list(card1["skill-list"], card2["skill-list"])
+	else
+			return false
+	end
 end
 
 function is_same_slot( slot1, slot2 )
@@ -23,13 +37,7 @@ function is_same_slot( slot1, slot2 )
 
 	if slot1.support ~= slot2.support then return false end
 
-	if slot1.card == nil and slot2.card == nil then
-		return true
-	elseif slot1.card ~= nil and slot2.card ~= nil then
-		return is_same_card(slot1.card, slot2.card)
-	else
-		return false
-	end
+	return is_same_card(slot1.card, slot2.card)
 end
 
 function is_same_team( team1, team2 )
